@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 
 mongoose.connect(
-    "mongodb+srv://Sai0047:rXxgqYKPqwnhcXX7@cluster0.qptsw.mongodb.net/group23DatabaseBook"
+    "mongodb+srv://Sai0047:rXxgqYKPqwnhcXX7@cluster0.qptsw.mongodb.net/group59Database"
 ,{useNewUrlParser:true})
 .then(()=>{console.log(chalk.bgCyan("MongoDB is Successfully Connected"))})
 .catch((err)=> {console.log(err.message)});
