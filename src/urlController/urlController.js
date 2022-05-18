@@ -49,10 +49,10 @@ module.exports.createUrl = async (req, res) => {
         }
 
         // if Valid , we create the url code
-        const urlCode = shortid.generate();
+        const urlCode = shortid.generate().toLowerCase();
 
         // check that if long url is already exists or not 
-        const existUrl = await urlModel.findOne({ longUrl: longUrl });
+        const existUrl = await urlModel.findOne({ longUrl: longUrl }).select({ shortUrl:1, longUrl:1,  urlCode:1, _id:0});
 
         // If exists then send error 
         if (existUrl) {
@@ -75,6 +75,7 @@ module.exports.createUrl = async (req, res) => {
 
             const Url = await urlModel.create(data);
             return res.status(201).send({ status: true, data: data })
+            // res.json(data)
         }
     }
     catch (err) {
@@ -97,9 +98,9 @@ module.exports.getShortUrl = async (req, res) => {
 
         // If urlCode exist then simply redirect it
         if (url) {
-            res.redirect(url.longUrl)
+            res.status(302).redirect(url.longUrl)
         } else {
-            res.status(404).send({ status: false, data: "No URL Found With this" })
+            res.status(404).send({ status: false, data: "No URL Found With this URL CODE" })
         }
 
     }
