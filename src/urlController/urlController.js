@@ -1,5 +1,5 @@
 const urlModel = require("../models/urlModel");
-const validUrl = require("valid-url")
+// const validUrl = require("valid-url")
 const shortid = require("shortid")
 
 // Require Redis 
@@ -11,7 +11,7 @@ const { promisify } = require("util");
     const redisClient = redis.createClient(
         18740,
         "redis-18740.c264.ap-south-1-1.ec2.cloud.redislabs.com",
-        { no_ready_check: true }
+        { no_ready_check : true }
     );
 
     redisClient.auth("TPROsXKiJC9IYce2EdFK1m5LI0iPp77Q", (err) => {
@@ -19,13 +19,13 @@ const { promisify } = require("util");
     });
 
     redisClient.on("connect", async function () {
-        console.log("Connected to Redis..");
+        console.log("Connected to Redis......😍😍");
     });
 
 
     // Connection setup for redis 
-    const GET_ASYNC =promisify(redisClient.GET).bind(redisClient)
-    const SET_ASYNC =promisify(redisClient.SET).bind(redisClient)
+    const GET_ASYNC = promisify(redisClient.GET).bind(redisClient)
+    const SET_ASYNC = promisify(redisClient.SET).bind(redisClient)
 
 const isValid = (value) => {
     if (typeof value === "string" && value.trim().length === 0) return false;
@@ -51,14 +51,20 @@ module.exports.createUrl = async (req, res) => {
         // Extract Request Body
         const body = req.body;
 
+        // Check data is coming or not in body 
+        if(! Object.getOwnPropertyNames(body).length > 0){
+            return res.status(400).send({ status: false, msg: "Please give us Long Url to Shorten the Url" })
+        }
+
         // Destruct the Request Body Object
         const { longUrl } = body;
 
         // The API base Url endpoint
         const baseUrl = 'http://localhost:3000'
 
-        // Check Base URL if valid using the validUrl.isUri method
 
+//================================== Validations =======================================================================================================================
+        // Validate the baseURL
         if (!isValidURL(baseUrl)) {
             return res.status(400).send({ status: false, msg: "Invalid Base Url Code to Shorten the Url " })
         }
@@ -78,14 +84,16 @@ module.exports.createUrl = async (req, res) => {
             return res.status(400).send({ status: false, msg: "Invalid Long Url !! Please Check With it " })
         }
 
+//================================== Validations-END ===================================================================================================================
+
         // Checking in Cache that data present or not 
         let cachedData = await GET_ASYNC(`${longUrl}`)
         if(cachedData) {
-            console.log("Comming From Redis....")
+            console.log("Data is Comming From Redis....")
 
             // Convert JSON into Plain Object to send 
             let changedObject = JSON.parse(cachedData)
-            return res.status(201).send({ status : true, Message:'Success', Data:changedObject })
+            return res.status(201).send({ status : true, Message:'Success', Data: changedObject })
         }
 
         // if Valid , we create the url code
@@ -96,6 +104,7 @@ module.exports.createUrl = async (req, res) => {
 
         // If exists then send error 
         if (existUrl) {
+            
             // Set data in cache memory 
             const cacheData = await SET_ASYNC(`${longUrl}`,JSON.stringify(existUrl))
             // res.json(existUrl) 
@@ -135,13 +144,13 @@ module.exports.getShortUrl = async (req, res) => {
         const urlCode = req.params.urlCode;
 
         // Checking in Cache that data present or not 
-        let cachedData = await GET_ASYNC(`${longUrl}`)
+        let cachedData = await GET_ASYNC(`${urlCode}`)
         if(cachedData) {
-            console.log("Comming From Redis....")
+            console.log("Data Is Comming From Redis....")
 
             // Convert JSON into Plain Object to send 
             let changedObject = JSON.parse(cachedData)
-            return res.status(201).send({ status : true, Message:'Success', Data: changedObject })
+            return res.status(302).redirect(changedObject.longUrl)
         }
 
 
@@ -154,7 +163,7 @@ module.exports.getShortUrl = async (req, res) => {
         }
         
         const cacheData = await SET_ASYNC(`${urlCode}`,JSON.stringify(url))
-        res.status(302).redirect(url.longUrl)
+        return res.status(302).redirect(url.longUrl)
     }
     catch (err) {
         return res.status(500).send({ status: false, msg: err.msg })
