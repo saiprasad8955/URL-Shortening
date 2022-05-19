@@ -93,7 +93,7 @@ module.exports.createUrl = async (req, res) => {
 
             // Convert JSON into Plain Object to send 
             let changedObject = JSON.parse(cachedData)
-            return res.status(201).send({ status : true, Message:'Success', Data: changedObject })
+            return res.status(200).send({ status : true, data: changedObject })
         }
 
         // if Valid , we create the url code
@@ -168,4 +168,4 @@ module.exports.getShortUrl = async (req, res) => {
     catch (err) {
         return res.status(500).send({ status: false, msg: err.msg })
     }
-};
+};``
