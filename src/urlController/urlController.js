@@ -153,7 +153,6 @@ module.exports.getShortUrl = async (req, res) => {
             return res.status(302).redirect(changedObject.longUrl)
         }
 
-
         // find a document match to the code in req.params.code
         const url = await urlModel.findOne({ urlCode: urlCode });
         
