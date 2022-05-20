@@ -8,7 +8,7 @@ router.post("/url/shorten", urlController.createUrl );
 
 
 // GET API's
-router.get("/get/:urlCode", urlController.getShortUrl)
+router.get("/:urlCode", urlController.getShortUrl)
 
 
 
