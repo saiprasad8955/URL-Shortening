@@ -60,7 +60,7 @@ module.exports.createUrl = async (req, res) => {
         const { longUrl } = body;
 
         // The API base Url endpoint
-        const baseUrl = 'http://localhost:3000'
+        const baseUrl = 'http://localhost:3000/'
 
 
 //================================== Validations =======================================================================================================================
@@ -114,16 +114,17 @@ module.exports.createUrl = async (req, res) => {
         // if not exists then create one 
         if (!existUrl) {
 
-            // join the baseurl and generated short code 
-            const shortUrl = baseUrl + "/" + urlCode;
+            // Join the baseurl and generated short code 
+            const shortUrl = baseUrl + urlCode;
 
-            // send response as required
+            // Send response as required
             const data = {
                 longUrl: longUrl,
                 shortUrl: shortUrl,
                 urlCode: urlCode
             };
 
+            // After that create data in collection 
             const Url = await urlModel.create(data);
             return res.status(201).send({ status: true, data: data })
         }
@@ -156,11 +157,12 @@ module.exports.getShortUrl = async (req, res) => {
         // find a document match to the code in req.params.code
         const url = await urlModel.findOne({ urlCode: urlCode });
         
-        // If urlCode exist then simply redirect it
+        // If not found data in db then we will send error  
         if(!url){
             res.status(404).send({ status: false, data: "No URL Found With this URL CODE" })
         }
         
+        // If data found then simply set the data in cache and redirect it
         const cacheData = await SET_ASYNC(`${urlCode}`,JSON.stringify(url))
         return res.status(302).redirect(url.longUrl)
     }
