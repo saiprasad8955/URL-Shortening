@@ -1,5 +1,5 @@
 const urlModel = require("../models/urlModel");
-// const validUrl = require("valid-url")
+
 const shortid = require("shortid")
 
 // Require Redis 
@@ -27,14 +27,14 @@ const { promisify } = require("util");
     const GET_ASYNC = promisify(redisClient.GET).bind(redisClient)
     const SET_ASYNC = promisify(redisClient.SET).bind(redisClient)
 
-const isValid = (value) => {
-    if (typeof value === "string" && value.trim().length === 0) return false;
-    if (typeof value === "undefined" || typeof value === null) return false;
+const isValid = (value) => { 
+    if ( typeof value === "string" && value.trim().length === 0 ) return false;
+    if ( typeof value === "undefined" || typeof value === null ) return false;
     return true;
 }
 
 const isValid2 = (value) => {
-    const dv = /[a-zA-Z]/
+    const dv = /[a-zA-Z]/ 
     if (typeof value !== "string") return false;
     if (dv.test(value) === false) return false;
     return true;
@@ -57,7 +57,7 @@ module.exports.createUrl = async (req, res) => {
         }
 
         // Destruct the Request Body Object
-        const { longUrl } = body;
+        const { longUrl } = body ;
 
         // The API base Url endpoint
         const baseUrl = 'http://localhost:3000/'
@@ -65,22 +65,22 @@ module.exports.createUrl = async (req, res) => {
 
 //================================== Validations =======================================================================================================================
         // Validate the baseURL
-        if (!isValidURL(baseUrl)) {
+        if (! isValidURL(baseUrl)) {
             return res.status(400).send({ status: false, msg: "Invalid Base Url Code to Shorten the Url " })
         }
 
         // Check longUrl is coming or not 
-        if (!isValid(longUrl)) {
+        if (! isValid(longUrl)) {
             return res.status(400).send({ status: false, msg: "Please Enter Long Url" })
-        }
+        } 
 
         // Long Url must not be a number
-        if (!isValid2(longUrl)) {
+        if (! isValid2(longUrl)) {
             return res.status(400).send({ status: false, msg: "Long Url is Invalid!!" })
         }
 
         // Check longUrl is valid or not 
-        if (!isValidURL(longUrl)) {
+        if (! isValidURL(longUrl)) {
             return res.status(400).send({ status: false, msg: "Invalid Long Url !! Please Check With it " })
         }
 
@@ -93,40 +93,40 @@ module.exports.createUrl = async (req, res) => {
 
             // Convert JSON into Plain Object to send 
             let changedObject = JSON.parse(cachedData)
-            return res.status(200).send({ status : true, data: changedObject })
+            return res.status(200).send({ status : true, data: changedObject });
         }
 
         // if Valid , we create the url code
-        const urlCode = shortid.generate().toLowerCase();
+        const urlCode = shortid.generate().toLowerCase() ;
 
-        // check that if long url is already exists or not 
+        // Check that if long url is already exists or not 
         const existUrl = await urlModel.findOne({ longUrl: longUrl }).select({ shortUrl: 1, longUrl: 1, urlCode: 1, _id: 0 });
 
         // If exists then send error 
         if (existUrl) {
             
             // Set data in cache memory 
-            const cacheData = await SET_ASYNC(`${longUrl}`,JSON.stringify(existUrl))
+            const cacheData = await SET_ASYNC(`${longUrl}`, JSON.stringify(existUrl))
             // res.json(existUrl) 
             res.status(200).send({ status: true, data: existUrl });
         }
 
         // if not exists then create one 
-        if (!existUrl) {
+        if (! existUrl) {
 
             // Join the baseurl and generated short code 
             const shortUrl = baseUrl + urlCode;
 
             // Send response as required
             const data = {
-                longUrl: longUrl,
-                shortUrl: shortUrl,
-                urlCode: urlCode
+                longUrl : longUrl,
+                shortUrl : shortUrl,
+                urlCode : urlCode
             };
 
             // After that create data in collection 
             const Url = await urlModel.create(data);
-            return res.status(201).send({ status: true, data: data })
+            return res.status(201).send({ status: true, data: data });
         }
     }
     catch (err) {
@@ -142,7 +142,7 @@ module.exports.getShortUrl = async (req, res) => {
     try {
 
         // Extract urlCode from path params
-        const urlCode = req.params.urlCode;
+        const urlCode = req.params.urlCode ;
 
         // Checking in Cache that data present or not 
         let cachedData = await GET_ASYNC(`${urlCode}`)
@@ -158,12 +158,12 @@ module.exports.getShortUrl = async (req, res) => {
         const url = await urlModel.findOne({ urlCode: urlCode });
         
         // If not found data in db then we will send error  
-        if(!url){
+        if(! url){
             res.status(404).send({ status: false, data: "No URL Found With this URL CODE" })
         }
         
         // If data found then simply set the data in cache and redirect it
-        const cacheData = await SET_ASYNC(`${urlCode}`,JSON.stringify(url))
+        const cacheData = await SET_ASYNC(`${urlCode}`, JSON.stringify(url))
         return res.status(302).redirect(url.longUrl)
     }
     catch (err) {
