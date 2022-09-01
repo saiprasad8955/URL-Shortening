@@ -26,11 +26,11 @@ redisClient.on("connect", async function () {
 const GET_ASYNC = util.promisify(redisClient.GET).bind(redisClient)
 const SET_ASYNC = util.promisify(redisClient.SET).bind(redisClient)
 
-// const isValid = (value) => {
-//     if (typeof value === "string" && value.trim().length === 0) return false;
-//     if (typeof value === "undefined" || typeof value === null) return false;
-//     return true;
-// }
+const isValid = (value) => {
+    if (typeof value === "string" && value.trim().length === 0) return false;
+    if (typeof value === "undefined" || typeof value === null) return false;
+    return true;
+}
 
 const isValid2 = (value) => {
     const dv = /[a-zA-Z]/
@@ -39,9 +39,9 @@ const isValid2 = (value) => {
     return true;
 }
 
-// const isValidURL = function (url) {
-//     return (/^(ftp|http|https):\/\/[^ "]+$/).test(url);
-// }
+const isValidURL = function (url) {
+    return (/^(ftp|http|https):\/\/[^ "]+$/).test(url);
+}
 
 module.exports.createUrl = async (req, res) => {
 
@@ -64,9 +64,9 @@ module.exports.createUrl = async (req, res) => {
 
         //================================== Validations =======================================================================================================================
         // Validate the baseURL
-        if (!isValidURL(baseUrl)) {
-            return res.status(400).send({ status: false, msg: "Invalid Base Url Code to Shorten the Url " })
-        }
+        // if (!isValidURL(baseUrl)) {
+        //     return res.status(400).send({ status: false, msg: "Invalid Base Url Code to Shorten the Url " })
+        // }
 
         // Check longUrl is coming or not 
         if (!isValid(longUrl)) {
